@@ -13,7 +13,7 @@ require_once 'includes/SolicitacaoService.php';
 session_start();
 
 // Instancia serviços
-$service = new AlunoService($pdo);
+$alunoService = new AlunoService($pdo);
 // Antes (Linha 17 com erro):
 $solicitacaoService = new SolicitacaoService($pdo);
 
