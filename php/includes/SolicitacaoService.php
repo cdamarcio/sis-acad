@@ -2,9 +2,6 @@
 // php/includes/SolicitacaoService.php
 require_once 'config.php';
 
-<?php
-// php/includes/SolicitacaoService.php
-
 class SolicitacaoService {
     private $pdo;
 
