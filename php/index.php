@@ -1,141 +1,98 @@
 <?php
 /**
  * IESB - Sistema de Controle de Acesso Acadêmico
- * Página Inicial
+ * Dashboard Principal
  */
 
-define('IESB_ACCESS', true);
 require_once 'includes/config.php';
-require_once 'includes/functions.php';
 require_once 'includes/AlunoService.php';
 require_once 'includes/SolicitacaoService.php';
 
-session_start();
-
-// Instancia serviços
+// Instanciação dos serviços com Injeção de Dependência (PDO)
 $alunoService = new AlunoService($pdo);
-// Antes (Linha 17 com erro):
 $solicitacaoService = new SolicitacaoService($pdo);
 
-// Obtém estatísticas
-$alunos = $alunoService->listar();
-$solicitacoes = $solicitacaoService->listar();
-
-$totalAlunos = count($alunos);
-$totalSolicitacoes = count($solicitacoes);
-$solicitacoesAbertas = array_filter($solicitacoes, fn($s) => $s['status'] === 'ABERTA');
-$solicitacoesAnalise = array_filter($solicitacoes, fn($s) => $s['status'] === 'ANALISE');
-
+// Coleta de dados para o Dashboard
+$statusGeral = $alunoService->obterStatusAcademico();
+$ultimosAlunos = $alunoService->listar();
+$ultimasSolicitacoes = $solicitacaoService->listar();
 ?>
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IESB - Controle de Acesso Acadêmico</title>
+    <title>IESB - Dashboard de Acesso</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .dashboard-cards { display: flex; gap: 20px; margin-bottom: 30px; }
+        .card { padding: 20px; border-radius: 8px; color: white; flex: 1; text-align: center; }
+        .card.total { background-color: #2c3e50; }
+        .card.ativos { background-color: #27ae60; }
+        .card.inativos { background-color: #c0392b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
+        .status-ativo { background: #eafaf1; color: #27ae60; }
+        .status-inativo { background: #fdedec; color: #e74c3c; }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <h1>IESB - Controle de Acesso Acadêmico</h1>
-            <p>Sistema de Gestão de Alunos e Solicitações</p>
-        </div>
+    <header>
+        <h1>🎓 IESB - Gestão de Acesso Acadêmico</h1>
+        <nav>
+            <a href="pages/aluno-cadastrar.php">Novo Aluno</a> | 
+            <a href="pages/solicitacao-abrir.php">Nova Solicitação</a> | 
+            <a href="pages/acesso-consultar.php">Portaria (Acesso)</a>
+        </nav>
     </header>
 
-    <div class="container">
-        <nav class="nav">
-            <ul>
-                <li><a href="index.php">Início</a></li>
-                <li><a href="pages/aluno-cadastrar.php">Cadastrar Aluno</a></li>
-                <li><a href="pages/aluno-listar.php">Listar Alunos</a></li>
-                <li><a href="pages/solicitacao-abrir.php">Abrir Solicitação</a></li>
-                <li><a href="pages/solicitacao-listar.php">Listar Solicitações</a></li>
-                <li><a href="pages/acesso-consultar.php">Consultar Acesso</a></li>
-            </ul>
-        </nav>
-
-        <?php $flash = getFlashMessage(); if ($flash): ?>
-            <div class="alert alert-<?php echo $flash['tipo']; ?>">
-                <?php echo sanitize($flash['mensagem']); ?>
+    <main>
+        <h2>Resumo Institucional</h2>
+        <div class="dashboard-cards">
+            <div class="card total">
+                <h3>Total de Alunos</h3>
+                <p style="font-size: 2em;"><?php echo $statusGeral['total']; ?></p>
             </div>
-        <?php endif; ?>
-
-        <div class="card">
-            <h2>Dashboard</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Total de Alunos</label>
-                    <span style="font-size: 2rem; color: #2a5298;"><?php echo $totalAlunos; ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Total de Solicitações</label>
-                    <span style="font-size: 2rem; color: #2a5298;"><?php echo $totalSolicitacoes; ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Solicitações Abertas</label>
-                    <span style="font-size: 2rem; color: #dc3545;"><?php echo count($solicitacoesAbertas); ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Em Análise</label>
-                    <span style="font-size: 2rem; color: #ffc107;"><?php echo count($solicitacoesAnalise); ?></span>
-                </div>
+            <div class="card ativos">
+                <h3>Alunos Ativos</h3>
+                <p style="font-size: 2em;"><?php echo $statusGeral['ativos']; ?></p>
+            </div>
+            <div class="card inativos">
+                <h3>Alunos Inativos</h3>
+                <p style="font-size: 2em;"><?php echo $statusGeral['inativos']; ?></p>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Status Acadêmico - Resumo</h2>
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Matrícula</th>
-                            <th>Nome</th>
-                            <th>Curso</th>
-                            <th>Status</th>
-                            <th>Pendência</th>
-                            <th>Acesso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $statusAcademico = $alunoService->obterStatusAcademico();
-                        $limit = min(5, count($statusAcademico));
-                        for ($i = 0; $i < $limit; $i++): 
-                            $aluno = $statusAcademico[$i];
-                        ?>
-                            <tr>
-                                <td><?php echo sanitize($aluno['Matrícula']); ?></td>
-                                <td><?php echo sanitize($aluno['Nome']); ?></td>
-                                <td><?php echo sanitize($aluno['Curso']); ?></td>
-                                <td>
-                                    <span class="badge <?php echo $aluno['Status Aluno'] === 'ATIVO' ? 'badge-success' : 'badge-danger'; ?>">
-                                        <?php echo $aluno['Status Aluno']; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge <?php echo $aluno['Possui Pendência'] === 'SIM' ? 'badge-warning' : 'badge-secondary'; ?>">
-                                        <?php echo $aluno['Possui Pendência']; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge <?php echo $aluno['Acesso Liberado'] === 'SIM' ? 'badge-success' : 'badge-danger'; ?>">
-                                        <?php echo $aluno['Acesso Liberado'] === 'SIM' ? 'LIBERADO' : 'BLOQUEADO'; ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endfor; ?>
-                    </tbody>
-                </table>
-            </div>
-            <p style="margin-top: 15px;">
-                <a href="pages/aluno-listar.php" class="btn btn-secondary btn-sm">Ver todos</a>
-            </p>
-        </div>
-    </div>
+        <section>
+            <h3>Últimas Solicitações Registradas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Aluno</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach (array_slice($ultimasSolicitacoes, 0, 5) as $sol): ?>
+                    <tr>
+                        <td><?php echo date('d/m/Y H:i', strtotime($sol['data_abertura'])); ?></td>
+                        <td><?php echo htmlspecialchars($sol['aluno_nome']); ?></td>
+                        <td><?php echo $sol['tipo_solicitacao']; ?></td>
+                        <td><span class="status-badge"><?php echo $sol['status']; ?></span></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </section>
+    </main>
 
-    <footer class="footer">
-        <p>&copy; <?php echo date('Y'); ?> IESB - Instituto de Educação Superior de Brasília</p>
+    <footer style="margin-top: 50px; color: #666;">
+        <p>&copy; 2026 IESB - Analista de Sistemas: Márcio Rodrigues de Oliveira</p>
     </footer>
 </body>
 </html>
