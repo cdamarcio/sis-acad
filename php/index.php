@@ -15,9 +15,6 @@ session_start();
 // Instancia serviços
 $service = new AlunoService($pdo);
 // Antes (Linha 17 com erro):
-$solicitacaoService = new SolicitacaoService(); 
-
-// Depois (Correto):
 $solicitacaoService = new SolicitacaoService($pdo);
 
 // Obtém estatísticas
