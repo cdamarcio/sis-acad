@@ -13,8 +13,12 @@ require_once 'includes/SolicitacaoService.php';
 session_start();
 
 // Instancia serviços
-$alunoService = new AlunoService();
-$solicitacaoService = new SolicitacaoService();
+$service = new AlunoService($pdo);
+// Antes (Linha 17 com erro):
+$solicitacaoService = new SolicitacaoService(); 
+
+// Depois (Correto):
+$solicitacaoService = new SolicitacaoService($pdo);
 
 // Obtém estatísticas
 $alunos = $alunoService->listar();
