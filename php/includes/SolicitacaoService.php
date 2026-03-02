@@ -2,12 +2,33 @@
 // php/includes/SolicitacaoService.php
 require_once 'config.php';
 
+<?php
+// php/includes/SolicitacaoService.php
+
 class SolicitacaoService {
     private $pdo;
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
     }
+
+    // ADICIONE ESTA FUNÇÃO ABAIXO:
+    public function listar() {
+        try {
+            // Consulta que busca as solicitações e o nome do aluno relacionado
+            $sql = "SELECT s.*, a.nome as aluno_nome 
+                    FROM solicitacoes s 
+                    JOIN alunos a ON s.aluno_id = a.id 
+                    ORDER BY s.data_abertura DESC";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+    
+    // ... suas outras funções (abrirSolicitacao, etc) ...
+}
 
     public function abrirSolicitacao($aluno_id, $tipo, $descricao) {
         try {
