@@ -1,0 +1,18 @@
+# Dependências do PHP (Composer)
+/vendor/
+
+# Configurações de Ambiente (Segurança!)
+.env
+.env.local
+
+# Logs e Cache
+*.log
+/php/logs/
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# IDEs (VS Code, PHPStorm)
+.vscode/
+.idea/
