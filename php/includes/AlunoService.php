@@ -9,6 +9,11 @@ class AlunoService {
         $this->pdo = $pdo;
     }
 
+    public function listar() {
+        $stmt = $this->pdo->query("SELECT * FROM alunos ORDER BY nome ASC");
+        return $stmt->fetchAll();
+    }
+    
     public function cadastrar($nome, $matricula, $cpf, $email) {
         try {
             // Chamada da Procedure com tratamento de exceção (TRY/CATCH)
