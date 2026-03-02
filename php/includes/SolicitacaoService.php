@@ -1,6 +1,8 @@
 <?php
-// php/includes/SolicitacaoService.php
-require_once 'config.php';
+/**
+ * IESB - Sistema de Controle de Acesso Acadêmico
+ * Camada de Serviço para Gestão de Solicitações
+ */
 
 class SolicitacaoService {
     private $pdo;
@@ -9,10 +11,12 @@ class SolicitacaoService {
         $this->pdo = $pdo;
     }
 
-    // ADICIONE ESTA FUNÇÃO ABAIXO:
+    /**
+     * Lista todas as solicitações com o nome do aluno relacionado
+     * Utilizado para alimentar o Dashboard principal.
+     */
     public function listar() {
         try {
-            // Consulta que busca as solicitações e o nome do aluno relacionado
             $sql = "SELECT s.*, a.nome as aluno_nome 
                     FROM solicitacoes s 
                     JOIN alunos a ON s.aluno_id = a.id 
@@ -20,36 +24,45 @@ class SolicitacaoService {
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
+            // Em caso de erro, retorna array vazio para não quebrar o foreach no index
             return [];
         }
     }
-    
-    // ... suas outras funções (abrirSolicitacao, etc) ...
-}
 
+    /**
+     * Abre uma nova solicitação acadêmica
+     * Validações de regras de negócio são tratadas via Procedure ou Service.
+     */
     public function abrirSolicitacao($aluno_id, $tipo, $descricao) {
         try {
-            // Regra de Negócio: Aluno deve estar ATIVO para abrir solicitação
-            $sqlCheck = "SELECT status FROM alunos WHERE id = :id";
-            $stmtCheck = $this->pdo->prepare($sqlCheck);
-            $stmtCheck->execute([':id' => $aluno_id]);
-            $aluno = $stmtCheck->fetch();
-
-            if (!$aluno || $aluno['status'] !== 'ATIVO') {
-                return "Erro: Apenas alunos ATIVOS podem abrir solicitações.";
-            }
-
-            $sql = "INSERT INTO solicitacoes (aluno_id, tipo_solicitacao, descricao) 
-                    VALUES (:aluno_id, :tipo, :descricao)";
+            $sql = "INSERT INTO solicitacoes (aluno_id, tipo_solicitacao, descricao, status) 
+                    VALUES (:aluno_id, :tipo, :descricao, 'ABERTA')";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
-                ':aluno_id' => $aluno_id,
-                ':tipo'     => $tipo,
+                ':aluno_id'  => $aluno_id,
+                ':tipo'      => $tipo,
                 ':descricao' => $descricao
             ]);
-            return "Solicitação aberta com sucesso!";
+            return true;
         } catch (PDOException $e) {
-            return "Erro no banco: " . $e->getMessage();
+            error_log("Erro ao abrir solicitação: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Altera o status de uma solicitação (Ex: ABERTA -> FINALIZADA)
+     */
+    public function alterarStatus($id, $novoStatus) {
+        try {
+            $sql = "UPDATE solicitacoes SET status = :status WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([
+                ':status' => $novoStatus,
+                ':id'     => $id
+            ]);
+        } catch (PDOException $e) {
+            return false;
         }
     }
 }
