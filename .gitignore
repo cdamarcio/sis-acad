@@ -1,18 +1,12 @@
-# Dependências do PHP (Composer)
+# Dependências
 /vendor/
+node_modules/
 
-# Configurações de Ambiente (Segurança!)
+# Configurações sensíveis
 .env
-.env.local
+config.php
+connection_settings.ini
 
 # Logs e Cache
 *.log
-/php/logs/
-
-# Arquivos do Sistema Operacional
-.DS_Store
-Thumbs.db
-
-# IDEs (VS Code, PHPStorm)
-.vscode/
-.idea/
+.cache/
