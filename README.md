@@ -29,3 +29,7 @@ O **IESB Acesso Acadêmico** é um sistema para gestão de fluxo estudantil. Ele
 * **Autenticação:** Implementação de login seguro para administradores e alunos.
 * **API REST:** Criação de endpoints para integração direta com hardware de catracas.
 * **Dashboard de BI:** Relatórios gráficos sobre o tempo médio de resolução de solicitações.
+
+### 6. Link do Vídeo:
+
+* https://www.linkedin.com/posts/marcioro_ugcPost-7434630804028149762-IleV?utm_source=share&utm_medium=member_desktop&rcm=ACoAADqvwxkBSll8_p6jGpYLJLlYXWKUfQCGKKI
